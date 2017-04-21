@@ -1,0 +1,21 @@
+Due file di testo contengono due matrici quadrate nel formato descritto sotto.
+
+Scrivete un programma che usa due thread per calcolare la somma e il prodotto delle due matrici.
+
+Il primo thread deve leggere le matrici, fare la somma e scrivere il risultato sullo schermo.
+
+Il secondo thread deve leggere le matrici, fare il prodotto e scrivere il risultato sullo schermo.
+
+I due thread sono avviati dal metodo main().
+
+
+
+Formato file:
+
+x11 x12 x13 .... x1n
+
+x21 x22 x23 .... x2n
+
+:
+
+xn1 xn2 xn3 .... xnn
