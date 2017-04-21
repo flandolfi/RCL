@@ -1,0 +1,21 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="SocialClient">
+    <output-path>$PROJECT_DIR$/out/artifacts/SocialClient</output-path>
+    <root id="archive" name="SocialClient.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/manifests/client/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="directory" name="simplesocial">
+        <element id="directory" name="client">
+          <element id="dir-copy" path="$PROJECT_DIR$/out/production/SimpleSocial/simplesocial/client" />
+        </element>
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/SimpleSocial/simplesocial/ErrorCode.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/SimpleSocial/simplesocial/Follower.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/SimpleSocial/simplesocial/Operation.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/SimpleSocial/simplesocial/Post.class" />
+        <element id="file-copy" path="$PROJECT_DIR$/out/production/SimpleSocial/simplesocial/Updater.class" />
+      </element>
+      <element id="extracted-dir" path="$PROJECT_DIR$/json-simple-1.1.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

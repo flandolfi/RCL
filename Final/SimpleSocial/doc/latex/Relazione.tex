@@ -1,0 +1,524 @@
+\documentclass[11pt]{article}
+\usepackage[italian]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{tikz-uml}
+
+\title{\textbf{SimpleSocial}\\Progetto di Fine Corso -- RCL}
+\author{
+	Francesco Landolfi\\
+	\href{mailto:fran.landolfi@gmail.com}
+	{\tt<fran.landolfi@gmail.com>}\\
+	Matricola: 444151
+}
+\date{\today}
+\begin{document}
+\maketitle
+
+
+\section{Struttura del progetto}
+
+Il progetto è suddiviso nei seguenti package:
+
+\begin{description}
+	\item[server] contenente le classi necessarie all'implementazione del
+	server di \emph{SimpleSocial}, ovvero:
+	\begin{description}
+		\item[Server] implementa l'eseguibile ed un'interfaccia basilare; offre
+		alcuni metodi per il savataggio ed il caricamento della configurazione e
+		del database degli utenti;
+		\item[TCPClientHandler] implementa il thread che gestisce una
+		connessione TCP proveniente da un client; esegue le principali
+		funzionalità offerte dal server;
+		\item[OnlineUsers] implementa il database degli utenti online; per ogni
+		utente, memorizza (tramite una classe privata, {\bf LogInRecord}) il
+		tempo di accesso, il token di autenticazione ({\tt oAuth}, un intero
+		positivo generato pseudocasualmente al momento dell'accesso) e
+		l'indirizzo IP del client;
+		\item[UsersDB] implementa il database degli utenti iscritti; una sua
+		istanza potrà essere serializzata e salvata su file, per essere
+		ricaricata in seguito dal server;
+		\item[User] rappresenta un utente di \emph{SimpleSocial}; per ogni
+		utente memorizza username e password, la lista di amici, la lista di
+		richieste di amicizia, la lista di follower e la lista di contenuti
+		ancora non ricevuti;
+		\item[PostDispatcher] notifica agli utenti quando viene pubblicato un
+		nuovo contenuto da un utente da loro seguito (tramite RMI).
+	\end{description}
+	\item[client] contenente le classi necessarie all'implementazione del
+	client di \emph{SimpleSocial}, ovvero:
+	\begin{description}
+		\item[Client] implementa l'eseguibile ed un'interfaccia utente di tipo
+		testuale e fornisce alcuni metodi per interagire con il server, oltre a
+		quelli per il salvataggio ed il caricamento della configurazione del
+		client, del database delle richieste di amicizia non ancora confermate
+		e del database dei {\bf Post} non ancora letti;
+		\item[KeepAliveSignalHandler] implementa il thread dedicato alla
+		ricezione e alla risposta dei messaggi di \emph{KeepAlive} mandati dal
+		server;
+		\item[NotificationHandler] implementa il thread dedicato alla ricezione
+		di richieste di amicizia inoltrate dal server; delega ogni richiesta
+		ad un'ulteriore thread, che esegue un {\bf Runnable} implementato dalla
+		classe privata {\bf Handler};
+		\item[PostNotifier] implementa una callback che verrà utilizzata da
+		un'istanza di {\bf PostDispatcher} per mandare al client il contenuto
+		di un {\bf Post} pubblicato da un amico.
+	\end{description}
+	\item[simplesocial] contenente i precedenti package {\bf server} e
+	{\bf client}, più alcune classi da loro condivise:
+	\begin{description}
+		\item[Follower] stub per RMI (implementata poi da {\bf PostNotifier});
+		\item[Updater] stub per RMI (implementata poi da {\bf PostDispatcher});
+		\item[ErrorCode] {\tt enum} utilizzata per la rappresentazione di
+		messaggi di errore (o di successo); offre metodi per la conversione da
+		{\bf ErrorCode} a intero e viceversa;
+		\item[Operation] {\tt enum} utilizzata per la comunicazione da parte del
+		client al server per specificare il tipo di operazione da compiere;
+		offre metodi per la conversione da {\bf Operation} a intero e viceversa;
+		\item[Post] un contenuto pubblicato da un utente di \emph{SimpleSocial};
+		ogni {\bf Post} memorizza il suo contenuto e l'utente che l'ha
+		pubblicato.
+	\end{description}
+\end{description}
+
+La \figurename~\ref{package} mostra le varie dipendenze tra le classi del
+progetto.
+
+\begin{figure}[h]
+\begin{tikzpicture}
+\begin{umlpackage}{simplesocial}
+	\begin{umlpackage}[x=0, y=0]{server}
+		\umlsimpleclass[x=-2, y=-4]{Server}
+		\umlsimpleclass[x=0, y=-0]{TCPClientHandler}
+		\umlsimpleclass[x=0.3, y=-1]{PostDispatcher}
+		\umlsimpleclass[x=0.6, y=-2]{OnlineUsers}
+		\umlsimpleclass[x=0.85, y=-3]{UsersDB}
+		\umlsimpleclass[x=1.15, y=-4]{User}
+		\umlaggreg[geometry=|-, anchor1=30]{Server}{UsersDB}
+		\umluniassoc[geometry=|-, anchor1=150]{Server}{TCPClientHandler}
+		\umluniassoc[geometry=|-, anchor1=120]{Server}{PostDispatcher}
+		\umluniassoc[geometry=|-, anchor1=60]{Server}{OnlineUsers}
+		\umluniassoc[geometry=-|-, arm1=0.5, anchor1=-10, anchor2=10]
+				{UsersDB}{User}
+		\umluniassoc[geometry=-|-, arm1=0.7, anchor1=-10, anchor2=-10]
+				{OnlineUsers}{User}
+		\umlaggreg[geometry=-|-, arm1=0.5, anchor1=-9, anchor2=10]
+				{TCPClientHandler}{PostDispatcher}
+		\umlaggreg[geometry=-|-, arm1=0.7, anchor1=0, anchor2=0]
+				{TCPClientHandler}{OnlineUsers}
+		\umlaggreg[geometry=-|-, arm1=1.3, anchor1=9, anchor2=0]
+				{TCPClientHandler}{UsersDB}
+		\umlaggreg[geometry=-|-, arm1=0.5, anchor1=-9, anchor2=10]
+				{PostDispatcher}{OnlineUsers}
+		\umlaggreg[geometry=-|-, arm1=1, anchor1=-1, anchor2=10]
+				{PostDispatcher}{UsersDB}
+	\end{umlpackage}
+	\begin{umlpackage}[x=7, y=0]{client}
+		\umlsimpleclass[x=-2, y=-2]{Client}
+		\umlsimpleclass[x=1, y=0]{KeepAliveSignalHandler}
+		\umlsimpleclass[x=1.4, y=-1]{NotificationHandler}
+		\umlsimpleclass[x=2.1, y=-2]{PostNotifier}
+		\umlassoc[geometry=|-, anchor1=145, anchor2=178, arg2=0..1, pos2=1.6]
+		{Client}{KeepAliveSignalHandler}
+		\umlassoc[geometry=|-, anchor1=65, anchor2=178, arg2=0..1, pos2=1.6]
+		{Client}{NotificationHandler}
+		\umlaggreg[geometry=-|, anchor1=185, anchor2=115]
+		{KeepAliveSignalHandler}{Client}
+		\umlaggreg[geometry=-|, anchor1=185, anchor2=35]
+		{NotificationHandler}{Client}
+		\umlassoc[arg2=0..1]{Client}{PostNotifier}
+	\end{umlpackage}
+	\umlsimpleclass[x=6.3, y=-5.5, type=enum]{ErrorCode}
+	\umlsimpleclass[x=9.5, y=-5.5, type=enum]{Operation}
+	\umlsimpleclass[x=9.5, y=-4, type=interface]{Follower}
+	\umlsimpleclass[x=6.3, y=-4, type=interface]{Updater}
+	\umlsimpleclass[x=3.7, y=-5.5]{Post}
+	\umlimpl[geometry=-|]{PostNotifier}{Follower}
+	\umlimpl[geometry=-|-, arm1=1.6, anchor1=5]{PostDispatcher}{Updater}
+\end{umlpackage}
+\end{tikzpicture}
+\centering
+\caption{Diagramma di package di \emph{SimpleSocial} \label{package}}
+\end{figure}
+
+
+\section{Eseguibili}
+
+\subsection{Server}
+Il server può essere eseguito dall'archivio {\tt SimpleServer.jar} con il
+comando
+
+\begin{verbatim}
+	$ java -jar SimpleServer.jar [OPTION]...
+\end{verbatim}
+
+Questo comando accetta varie opzioni che permettono di modificare la
+configurazione del server (ovvero impostare i valori delle varie porte, degli
+indirizzi, ecc...). Le opzioni sono:
+
+\begin{description}
+	\item [{\tt -h, --help}] mostra le possibili opzioni e termina;
+	\item [{\tt -d, --default}] utilizza i valori di default per tutti i
+	parametri non specificati. Se non viene inserita questa opzione, il server
+	caricherà la precedente configurazione salvata nel file {\tt conf.json}.
+	La configurazione caricata potrà essere comunque modificata dalle altre
+	opzioni, se specificate;
+	\item [{\tt -s, --save}] salva la configurazione generata nel file
+	{\tt conf.json} (al prossimo riavvio del server non sarà necessario passare
+	nuovamente gli stessi argomenti);
+	\item [{\tt -t, --tcp-port=PORT}] imposta {\tt PORT} come porta per le
+	comunicazioni TCP;
+	\item [{\tt -u, --udp-port=PORT}] imposta {\tt PORT} come porta per le
+	comunicazioni UDP;
+	\item [{\tt -m, --mc-port=PORT}] imposta {\tt PORT} come porta per le
+	comunicazioni in multicast;
+	\item [{\tt -r, --rmi-port=PORT}] imposta {\tt PORT} come porta usata dal
+	registro RMI;
+	\item [{\tt -k, --keep-alive=NUM}] imposta {\tt NUM} come intervallo di
+	tempo tra un mesaggio di KeepAlive ed un altro (in millisecondi);
+	\item [{\tt -g, --mc-group=IP}] imposta {\tt IP} come indirizzo del gruppo
+	multicast;
+	\item [{\tt -L, --log-duration=PERIOD}] imposta {\tt PERIOD}\footnote
+	{{\tt PERIOD} deve essere rappresentato nel formato {\tt PnDTnHnMn.nS}
+	(standard ISO-8601).} come periodo di validità di un accesso (dopo tale
+	periodo l'accesso sarà considerato scaduto e l'utente dovrà rieffettuare
+	il login);
+	\item [{\tt -R, --req-duration=PERIOD}] imposta {\tt PERIOD}\footnotemark
+	[\value{footnote}] come periodo di validità di una richiesta di amicizia
+	(dopo tale periodo la richiesta non viene accettata non sarà più valida e
+	dovrà essere rieffettuata).
+\end{description}
+
+Una volta avviato, il server non interagirà più con l'utente: i messaggi che
+stamperà a video saranno solo quelli di avvenuta connessione da parte di un
+client e di un'eventuale modifica del database degli utenti ({\bf UsersDB}).
+
+\paragraph{File utilizzati} Il processo al suo avvio accede ai file
+{\tt conf.json} (a meno che non venga passato come argomento {\tt -d}) e
+{\tt users.db} presenti nella cartella {\tt server\_data/}.
+
+Il primo contiene la configurazione del server in formato JSON, con i seguenti
+attributi:
+
+\begin{description}
+	\item[{\tt tcp\_port}] che rappresenta il numero di porta utilizzato per le
+	comunicazioni TCP;
+	\item[{\tt udp\_port}] che rppresenta il numero di porta utilizzato per le
+	comunicazioni UDP;
+	\item[{\tt mc\_port}] che rappresenta il numero di porta utilizzato per le
+	comunicazioni in multicast;
+	\item[{\tt rmi\_port}] che rappresenta il numero di porta utilizzato dal
+	registro RMI;
+	\item[{\tt mc\_group}] che rappresenta l'indirizzo IP del gruppo multicast;
+	\item[{\tt keep\_alive\_millis}] che rappresenta l'intervallo di tempo tra
+	un messaggio di	KeepAlive ed un altro;
+	\item[{\tt log\_duration}] che rappresenta il tempo di validità di un
+	accesso;\footnote{Rappresentato nel formato {\tt PnDTnHnMn.nS} (standard
+	ISO-8601).}
+	\item[{\tt request\_duration}] che rappresenta il tempo di validità di una
+	richiesta di amicizia.\footnotemark[\value{footnote}]
+\end{description}
+
+Il secondo contiene un oggetto {\bf UsersDB} serializzato, salvato su file al
+termine di ogni esecuzione e ripristinato ad ogni avvio del server, per
+garantire che i dati di ogni utente non vadano persi tra un'esecuzione e l'altra
+(viene salvato anche in caso di terminazione improvvisa).\footnote{Questo è
+anche il motivo principale per cui {\bf UsersDB} e {\bf OnlineUsers} sono due
+entità separate: poteva essere infatti conveniente creare un'unica classe che
+gestisse sia gli utenti registrati che quelli online (ed evitare così delle
+ridondanze), ma una volta termitata l'esecuzione, i dati degli utenti online non
+sarebbero stati più rilevanti, rendendo così inutile il salvataggio e ancor di
+più il ripristino di tali informazioni.}
+
+\paragraph{Thread e concorrenza} Ogni richiesta ricevuta dal server da parte di
+un client viene affidata ad un nuovo thread {\bf TCPClientHandler}. Questo crea
+un alto grado di concorrenza nelle strutture dati condivise, ovvero
+{\bf UsersDB}, {\bf OnlineUsers} e {\bf PostDispatcher}. Questa concorrenza
+viene gestita nei metodi delle classi stesse, mediante l'utilizzo di blocchi di
+mutua esclusione alle strutture dati interne.
+
+\subsection{Client}
+Il client può essere eseguito dall'archivio {\tt SimpleClient.jar} con il
+comando
+
+\begin{verbatim}
+	$ java -jar SimpleClient.jar
+\end{verbatim}
+
+Questo comando non accetta ulteriori argomenti, ma una volta eseguito chiede
+all'utente quali azioni eseguire mediante la selezione di alcune opzioni.
+Appena avviato il programma chiede se effettuare il login, registrarsi,
+configurare il client o uscire. Nei primi due casi, dopo aver inserito username
+e password, se il login o la registraizione\footnote{Per motivi pratici, la
+registrazione esegue in automatico anche il login.} vanno a buon fine, mostra le
+possibili interrogazioni che possono essere effettuate al server (ovvero
+ricercare utenti, aggiungere amici, accettare richieste di amicizia, mostrare la
+lista amici, pubblicare un contenuto o seguire un amico) o in locale (mostrare i
+contenuti pubblicati dagli amici seguiti dall'utente o mostrare le richieste in
+sospeso\footnote{Questa funzione viene effettuata automaticamente quando viene
+richiesto di accettare una richiesta amicizia: prima mostra le richieste in
+sospeso (in locale) poi chiede di inserire il nome dell'amico da accettare e
+invia la richiesta al server.}). Se si decide di configurare il client, invece,
+il programma offre un altro menù a scelta multipla con cui offre la possibilità
+di modificare i valori dell'IP del server o del gruppo multicast, delle varie
+porte utilizzate dal server (TCP, UDP, RMI, multicast), o selezionare
+l'interfaccia di rete da utilizzare per la ricezione dei messaggi in
+multicast\footnote{Questa opzione è stata inserita poichè
+{\tt NetworkInterface.getByInetAddress( InetAddress.getLocalHost() )} può
+restituire {\tt null} a seconda della macchina su cui viene eseguito il
+programma. Il valore di default di questo attributo è {\tt wlan0}. Se questo
+valore non dovesse andar bene, il thread {\bf KeepAliveSignalHandler} non
+potrebbe ricevere i messaggi di KeepAlive dal server, causando così il logout
+automatico dopo 10 secondi (default). Si consiglia quindi di modificare questo
+valore al primo avvio, provando con {\tt eth0} o con una delle interfacce
+mostrate col comando {\tt \$ ifconfig -a} (su sistema UNIX).}
+
+\paragraph{File utilizzati} Il processo al suo avvio accede al file
+{\tt conf.json} presente nella cartella {\tt client\_data/}, contenente la
+configurazione del client in formato JSON, con i seguenti attributi:
+
+\begin{description}
+	\item[{\tt tcp\_port}] che rappresenta il numero di porta utilizzato dal
+	server per le comunicazioni TCP;
+	\item[{\tt udp\_port}] che rppresenta il numero di porta utilizzato dal
+	server per le comunicazioni UDP;
+	\item[{\tt mc\_port}] che rappresenta il numero di porta utilizzato dal
+	server per le comunicazioni in multicast;
+	\item[{\tt rmi\_port}] che rappresenta il numero di porta utilizzato dal
+	registro RMI del server;
+	\item[{\tt mc\_group}] che rappresenta l'indirizzo IP del gruppo multicast;
+	\item[{\tt server\_address}] che rappresenta l'indirizzo IP del server;
+	\item[{\tt network\_interface}] che rappresenta l'interfaccia di rete
+	utilizzata dal client.
+\end{description}
+
+Inoltre, ad ogni login, il programma accede ai file
+{\tt requests-<\emph{username}>.db} e {\tt posts-<\emph{username}>.db}, che
+contengono rispettivamente il database delle richieste di amicizia non ancora
+accettate (un oggetto {\bf CopyOnWriteArrayList<String>} serializzato) e il
+database dei contenuti ricevuti non ancora letti (un oggetto
+{\bf BlockingQueue<Post>} serializzato) appartenenti all'utente che ha
+effettuato il login, il cui nome utente è {\tt \emph{username}}. Questi file
+verranno poi sovrascritti al momento del logout. L'utilizzo del nome utente nel
+nome dei file garantisce la sua unicità, poichè non possono esistere due utenti
+con lo stesso nome. I file inoltre vengono modificati solamente se il login ha
+successo, quindi un utente che non conosce la password non può accedere ai
+contenuti dei file mediante l'utilizzo di questo programma.
+
+\paragraph{Thread e concorrenza} Al momento del login, il processo crea due
+nuovi thread: un {\bf KeepAliveSignalHandler} ed un {\bf NotificationHandler}.
+Il primo ha come unico compito quello di rispondere ai messaggi di KeepAlive da
+parte del server e non crea quindi grossi problemi di concorrenza. Il secondo,
+invece, deve attendere da parte dal server l'arrivo di una richiesta di amicizia
+da parte di un altro utente. Una volta arrivata, il thread crea a sua volta un
+altro mini-thread e torna in attesa di un'altra richiesta. Il mini-thread, nel
+frattempo, accetta la connessione dal server e salva la richiesta di amicizia
+nell'apposita struttura dati del client. Per risolvere il problema della
+concorrenza, viene utilizzata come struttura dati una
+{\bf CopyOnWriteArrayList}, che è thread-safe.
+
+Al momento del login, inoltre, viene creato un oggetto {\bf PostNotifier} che
+verrà utilizzato come callback dal server per inviare al client i contenuti
+degli utenti seguiti. Questo oggetto modifica il database dei contenuti non
+ancora letti dal client, creando così un'altra concorrenza. Anche in questo caso
+viene risolta con l'utilizzo di una struttura dati thread-safe, ovvero
+{\bf BlockingQueue} (viene utilizzata una coda per mantenere l'ordine di arrivo
+dei contenuti).
+
+\subsection{Test Suite}
+È possibile inoltre eseguire una suite di test sulle classi usate dal client e
+dal server tramite l'utilizzo dell'archivio eseguibile {\tt TestSuite.jar} con
+il comando
+
+\begin{verbatim}
+	$ java -jar TestSuite.jar
+\end{verbatim}
+
+Questo comando esegue tutte le classi di test presenti nella cartella
+{\tt test/}, ovvero
+
+\begin{description}
+	\item[ErrorCodeTest] esegue un test di conversione dell'{\tt enum}
+	{\bf ErrorCode};
+	\item[OperationTest] esegue un test di conversione dell'{\tt enum}
+	{\bf Operation};
+	\item[UserTest] esegue il test sui vari metodi offerti dalla classe
+	{\bf User};
+	\item[UsersDBTest] esegue il test sui vari metodi offerti dalla classe
+	{\bf UsersDB};
+	\item[PostDispatcherTest] esegue il test sui vari metodi offerti dalla classe
+	{\bf PostDispatcher};
+	\item[ServerTest] esegue il test di salvataggio della configurazione e della
+	serializzazione del database degli utenti;
+	\item[ClientTest] esegue un test generale di interazione\footnote{In alcuni
+	punti del test vengono utilizzate delle {\tt Thread.sleep()}. Queste non
+	servono a risolvere una concorrenza non gestita, bensì ad attendere che il
+	client (o il server) abbia eseguito l'operazione richiesta (ad esempio:
+	quando il client esegue una {\tt post()}, il server risponde con
+	{\tt SUCCESS} quando ha ricevuto correttamente l'istruzione ma non quando
+	ha terminato di eseguirla. Questo può causare un'errore se si eseguono
+	un'operazione di {\tt post()} e una operazione di lettura dei contenuti in
+	rapida successione, ma non se viene utilizzato con tempi di reazione
+	\emph{umani}).} tra più istanze di {\bf Client} ed una di {\bf Server};
+	vengono eseguite tutte le principali funzioni.
+\end{description}
+
+L'esecuzione di questo processo produrrà una serie di messaggi di errore
+(causati di proposito). Al termine dell'esecuzione, il programma stamperà a
+schermo {\tt All test were successful!} se tutti i test sono stati superati,
+oppure {\tt FAIL:} seguito da un messaggio di errore se alcuni test non sono
+stati superati.
+
+\section{Comunicazione tra processi}
+
+\subsection{Canali di comunicazione}
+Le comunicazioni client-server avvengono tramite {\bf SocketChannel} per
+l'esecuzione delle funzionalità principali (login, registrazione, ricerca degli
+utenti, ecc...), {\bf DatagramChannel} per l'invio dei messaggi di KeepAlive in
+multicast e per la ricezione delle eventuali risposte (client-server UDP), e
+{\bf Socket} per l'inoltro delle richieste di amicizia dal server al
+destinatario.
+
+Nel server, i vari {\bf Channel} sono in modalità non-bloccante e vengono
+smistati con l'utilizzo di un {\bf Selector}. Quando arriva una richiesta da
+parte di un client, il server accetta la connessione la delega ad un nuovo
+thread {\bf TCPClientHandler}. Il canale risultante viene lasciato in modalità
+bloccante, per permette di implementare più facilmente un protocollo di
+comunicazione tra il server ed il client.
+
+\subsection{Protocollo di comunicazione}
+I client ed il server si scambiano messaggi tramite l'utilizzo di
+{\bf ByteBuffer}. I messaggi sono composti per lo più da interi e stringhe,
+convertiti in array di byte. Ogni stringa è sempre preceduta dalla lunghezza che
+occupa nel buffer (quindi, da un intero). Il contenuto dei messaggi varia a
+seconda della funzionalità da eseguire:
+
+\begin{description}
+	\item[{\tt login()}, {\tt register()}] invia la codifica dell'operazione da
+	eseguire in intero, seguita dall'username, la password, ed il numero di
+	porta\footnote{La porta viene generata dal thread {\bf NotificationHandler}
+	in modo dinamico. Questo permette di poter utilizzare più client su una
+	stessa macchina.} in cui il client attende connessioni per l'inoltro di una
+	richiesta di amicizia. Il server risponde con un intero che rappresenta un
+	{\bf ErrorCode} se negativo, altrimenti l'{\tt oAuth} se positivo (il client
+	ha effettuato il login con successo);
+	\item[{\tt addFriend()}] invia la codifica dell'operazione da eseguire in
+	intero, seguita dall'username, l'{\tt oAuth}, ed il nome dell'utente a cui
+	inviare la richiesta di amicizia. A questo punto, se l'autenticazione è
+	valida e l'utente è online, il server apre una socket al suo indirizzo
+	tramite la porta da lui specificata e gli invia una stringa contenente
+	l'username dell'utente che ha effettuato la richiesta. Dopodichè, in ogni
+	caso, il server risponde con un intero che rappresenta la codifica di un
+	{\bf ErrorCode}. La \figurename~\ref{addfriend} mostra il diagramma di
+	sequenza relativo allo svolgimento di questa funzionalità;
+
+	\begin{figure}[h]
+	\begin{tikzpicture}
+	\begin{umlseqdiag}
+	\umlactor[x=0, class=Client]{client1}
+	\umldatabase[x=3, class=Server]{server}
+	\umlactor[x=9,class=NotificationHandler]{client2}
+	\begin{umlcall}[op={open()}, return={accept()}]{client1}{server}
+		\umlcreatecall[x=6.5, class=TCPClientHandler]{server}{ch}
+	\end{umlcall}
+	\begin{umlcall}[op={write()}, return={close()}, dt=5]{client1}{ch}
+		\begin{umlfragment}
+		\begin{umlcall}[op={connect()}, return={accept()}, dt=5]{ch}{client2}
+			\umlcreatecall[x=11.5, class=Handler]{client2}{sh}
+		\end{umlcall}
+		\begin{umlcall}[op={write()}, return={close()}, dt=5]{ch}{sh}
+			\begin{umlcallself}[op={add()}, dt=5]{sh}
+			\end{umlcallself}
+		\end{umlcall}
+		\end{umlfragment}
+		\begin{umlcall}[type=return, op={write()}]{ch}{client1}
+		\end{umlcall}
+	\end{umlcall}
+	\end{umlseqdiag}
+	\end{tikzpicture}
+	\centering
+	\caption{Diagramma di sequenza di {\tt addFriend()} \label{addfriend}}
+	\end{figure}
+
+	\item[{\tt confirmFriendship()}] invia la codifica dell'operazione da
+	eseguire in intero, seguita dall'username, l'{\tt oAuth}, ed il nome
+	dell'utente a cui confermare la richiesta di amicizia. Il server, dopo aver
+	confermato la  richiesta, risponde con un intero che rappresenta la codifica
+	di un {\bf ErrorCode}.
+	\item[{\tt getFriendsList()}] invia la codifica dell'operazione da eseguire
+	in intero, seguita dall'username e dall'{\tt oAuth}. Il server, dopo aver
+	verificato l'autenticazione, manda un intero che rappresenta un
+	{\tt ErrorCode} se negativo, altrimenti il numero di utenti trovati nella
+	lista di amicizie. Dopodiché, seguiranno tutti i nomi degli amici trovati in
+	coppia con il loro rispettivo stato, codificato ad intero: 0 se online, -1
+	se offline. Se il numero degli utenti trovato è alto, le coppie utente-stato
+	possono essere distribuite più su buffer. Il client saprà che ci saranno
+	altri buffer da ricevere finche non avrà ricevuto un numero di utenti pari
+	a quello specificato all'inizio della serie.
+	\item[{\tt search()}] come {\tt getFriendList()}, ma senza la codifica dello
+	stato attuale;
+	\item[{\tt post()}] invia la codifica dell'operazione da eseguire in intero,
+	seguita dall'username e dall'{\tt oAuth}. Il server, dopo aver verificato
+	l'autenticazione, manda un intero che rappresenta un {\tt ErrorCode}. Se
+	quest'ultimo è uguale a {\tt SUCCESS}, il client invia al server la stringa
+	del contenuto da pubblicare (sempre preceduta dalla sua lunghezza). Il
+	contenuto può essere diviso su più buffer all'occorrenza;
+	\item[{\tt logout()}] invia la codifica dell'operazione da eseguire in
+	intero, seguita dall'username e dall'{\tt oAuth}. Il server, dopo aver
+	eseguito il logout, risponde con un intero che rappresenta la codifica di un
+	{\bf ErrorCode}.
+\end{description}
+
+
+% \begin{figure}[h]
+% \begin{tikzpicture}
+% \begin{umlseqdiag}
+% \umlactor[x=0, class=Client]{client1}
+% \umldatabase[x=3, class=Server]{server}
+% \begin{umlcall}[op={open()}, return={accept()}]{client1}{server}
+% 	\umlcreatecall[x=6.5, class=TCPClientHandler]{server}{ch}
+% \end{umlcall}
+% \begin{umlcall}[op={write()}, return={close()}, dt=5]{client1}{ch}
+% 	\begin{umlfragment}[type=alt, label=success, inner xsep=6]
+% 		\begin{umlfragment}[type=loop]]
+% 		\begin{umlcall}[type=return, op={write()}, dt=5]{ch}{client1}
+% 		\end{umlcall}
+% 		\end{umlfragment}
+% 	\umlfpart[default]
+% 	\begin{umlcall}[type=return, op={write()}, dt=-2]{ch}{client1}
+% 	\end{umlcall}
+% 	\end{umlfragment}
+% \end{umlcall}
+% \end{umlseqdiag}
+% \end{tikzpicture}
+% \centering
+% \caption{Diagramma di sequenza di {\tt search()} e {\tt getFriendsList()}
+% \label{search}}
+% \end{figure}
+
+
+
+\section{Note finali}
+
+Il progetto è stato sviluppato con IntelliJ IDEA 2016.2 (è possibile trovare i
+file relativi al progetto all'interno della cartella {\tt SimpleSocial/}). Sono
+state utilizzate le librerie standard Java (JDK 8 -- Oracle), JSON-Simple 1.1.1,
+e JUnit4 per lo sviluppo della suite di test.
+
+Ulteriori informazioni riguardo al progetto possono essere trovate nei vari
+commenti all'interno dei file sorgente presenti in {\tt src/simplesocial/},
+oppure consultando il JavaDoc presente in {\tt doc/html/index.html}.
+
+\paragraph{Possibili errori} Eseguendo il test può capitare (in modo
+apparentemente casuale) che nei punti dei metodi di {\bf Client} dove vengono
+effettuate più letture dal server o più scritture al server in successione (ad
+esempio in {\tt getFriendList()}, {\tt search()} o {\tt post()}) venga lanciata
+un'eccezione del tipo {\bf BufferUnderflowException}\footnote{Questa eccezione
+viene lanciata quando, utilizzando un {\bf ByteBuffer}, l'indicatore
+{\tt position} va oltre l'indicatore {\tt limit}.}. Pare quindi che qualche
+volta il server (o il client) non invii tutti i byte necessari a completare il
+messaggio, causando così il lancio di questa eccezione.
+
+\end{document}
