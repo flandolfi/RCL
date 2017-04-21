@@ -1,0 +1,15 @@
+Esercizio 1: Word lookup. 
+
+Dobbiamo verificare se un file di testo molto lungo contiene una parola. Scrivete un programma che usa 5 thread diversi per fare la ricerca.  La parola chiave viene fornita come parametro da linea di comando. Ogni thread legge una riga alla volta e cerca la parola. Il thread che trova la parola chiave per primo deve interrompere tutti gli altri.
+
+Attenzione: L'accesso al file di input deve essere sincronizzato!
+
+
+
+Esercizio 2: Prendere la parola.
+
+Un gruppo di n studenti organizza una conferenza. Ogni studente deve prendere la parola una volta, poi va a casa e può parlare solo uno studente alla volta.
+
+Modellare gli studenti con i thread. Quando uno studente prende la parola, scrive il suo discorso in una variabile String. Consideriamo che il discorso è semplicemente il suo nome. Prima che un altro studente possa parlare, tutti gli studenti rimasti devono leggere il discorso dell'ultimo speaker. 
+
+Alla fine rimane un solo studente che deve parlare. Scrive il suo nome e si spegne. Nessuno legge, l'ultimo ha parlato da solo!
