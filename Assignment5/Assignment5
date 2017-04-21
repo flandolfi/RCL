@@ -1,0 +1,9 @@
+1. PortScanner
+
+Scrivere un programma che trova tutte le porte aperte su una macchina. Il programma prende l’IP o l'hostname della macchina dalla linea di commando e prova a connettersi a tutte le porte per cercare quale sono aperte. Per quelle aperte scrive un messaggio sullo schermo.  
+
+2. MiniFTP 
+
+Scrivere un servizio di trasferimento di file: il cliente invia al server il nome di un file (in formato testo) preso dalla linea di comando. Il server risponde mandando al cliente il contenuto del file, riga per riga. Il cliente salva il contenuto in un file locale con lo stesso nome. Gestire situazioni di errore (file not found, etc)
+
+

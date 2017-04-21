@@ -1,0 +1,34 @@
+{
+    "products": [
+        {
+            "manufacturer": "Samsung",
+            "model": "Galaxy S7 Edge",
+            "price": 670
+        },
+        {
+            "manufacturer": "Samsung",
+            "model": "Galaxy S7",
+            "price": 600
+        },
+        {
+            "manufacturer": "Samsung",
+            "model": "Galaxy S6 Edge",
+            "price": 650
+        },
+        {
+            "manufacturer": "Samsung",
+            "model": "Galaxy A3",
+            "price": 230
+        },
+        {
+            "manufacturer": "Samsung",
+            "model": "Galaxy A7",
+            "price": 390
+        },
+        {
+            "manufacturer": "Microsoft",
+            "model": "Lumia 950",
+            "price": 430
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+Gestione forum
+
+Si vuole implementare un sistema che realizzi un servizio per la gestione di forum in rete. Un forum è caratterizzato da un argomento su cui diversi utenti possono scambiarsi opinioni via rete. Il sistema deve prevedere un server RMI che fornisca le seguenti funzionalità:
+
+apertura di un nuovo forum, di cui è specificato l'argomento (esempio: giardinaggio)?
+inserimento di un nuovo messaggio indirizzato ad un forum identificato dall'argomento (es: è tempo di piantare le viole, per il forum giardinaggio)?
+registrazione di una callback da parte dell'utente. La callback continene un riferimento ad uno dei forum attivi. Il server notifica al client, mediante la callback registrata , l'invio di ogni nuovo messaggio a quel forum.

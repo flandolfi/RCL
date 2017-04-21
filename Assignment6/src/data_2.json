@@ -1,0 +1,34 @@
+{
+    "products": [
+        {
+            "manufacturer": "Apple",
+            "model": "iPhone SE",
+            "price": 490
+        },
+        {
+            "manufacturer": "Apple",
+            "model": "iPhone 6S",
+            "price": 690
+        },
+        {
+            "manufacturer": "Samsung",
+            "model": "Galaxy S7 Edge",
+            "price": 700
+        },
+        {
+            "manufacturer": "Huawei",
+            "model": "P9",
+            "price": 600
+        },
+        {
+            "manufacturer": "Huawei",
+            "model": "P8",
+            "price": 350
+        },
+        {
+            "manufacturer": "Huawei",
+            "model": "P8 Lite",
+            "price": 200
+        }
+    ]
+}
