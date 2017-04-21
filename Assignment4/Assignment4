@@ -1,0 +1,18 @@
+Esercizi Laboratorio 4
+
+1. Matrici grandi
+
+Scrivere un programma che usa multithreading per moltiplicare due matrici molto grandi. Il thread main :
+generare 2 matrici n x n random molto grandi (tipo n = 1000 -> 1000 X 1000)
+implementare un task che calcola una riga della moltiplicazione (il numero della riga deve essere dato come parametro al task)
+usare un thread pool per avviare n task che calcolano la moltiplicazione
+Analizzare, sul vostro computer, quanti thread deve avere il thread pool per ottenere un risultato più veloce (simile al corso) - sottomettere l’analisi con il codice.
+
+
+2.  Producer-consumer: la mensa.
+
+Simulare il lavaggio dei piatti alla mensa. Gli studenti portano i loro piatti a lavare dopo aver mangiato (mangiano in 1-5 secondi). Ci sono due azioni diverse da fare per ogni piatto: lavare e risciacquare. Ci sono 7 persone che lavorano alla mensa, 3 lavano, 4 risciacquano. Ognuno di loro ha bisogno di 1-5 secondi per lavare/risciacquare un piatto.
+
+Simulate l’arrivo di 100 studenti, a intervalli di tempo aleatori. Il programma si ferma quando tutti i piatti sono lavati.
+
+Attenzione! Il programma non deve usare nè synchronized nè locking esplicito.

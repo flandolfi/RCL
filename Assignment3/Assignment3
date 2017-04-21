@@ -1,0 +1,11 @@
+1. Prendere la parola (vedi settimana precedente) con Lock e Condition.
+
+2. Simulazione Rotonda con 4 entrate. 
+
+Modellare con i thread delle auto che percorrono una rotonda. Per entrare, le auto devono essere sicure di non avere nessuna macchina a sinistra (nel quarto di rotonda precedente alla loro entrata). Una volta entrate, le auto percorrono un quarto di rotonda ogni secondo, fino a quando non raggiungono la loro uscita. Supponiamo che ci possono essere un numero illimitato di auto nella rotonda, in qualsiasi quarto.  
+
+Per ogni auto, l'entrata e l'uscita della rotonda sono generate in maniera random all’inizio (nel costruttore). Le auto sono generate nel main() con un intervallo tra 0 e 2 secondi.
+
+Tip: servono 4 Lock - attenzione: ogni auto aspetta il lock di sinistra però chiude il lock di destra. Ogni quarto di rotonda l'auto cambia lock.  
+
+

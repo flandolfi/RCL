@@ -1,0 +1,74 @@
+Number of threads in the pool: 1
+--------------------------------
+Test 0: 15601ms
+Test 1: 14165ms
+Test 2: 13554ms
+
+Average elapsed time: 14440ms
+
+Number of threads in the pool: 2
+--------------------------------
+Test 0: 8913ms
+Test 1: 7233ms
+Test 2: 6435ms
+
+Average elapsed time: 7527ms
+
+Number of threads in the pool: 3
+--------------------------------
+Test 0: 4883ms
+Test 1: 5059ms
+Test 2: 4566ms
+
+Average elapsed time: 4836ms
+
+Number of threads in the pool: 4
+--------------------------------
+Test 0: 7594ms
+Test 1: 6427ms
+Test 2: 4355ms
+
+Average elapsed time: 6125ms
+
+Number of threads in the pool: 5
+--------------------------------
+Test 0: 3155ms
+Test 1: 3285ms
+Test 2: 6899ms
+
+Average elapsed time: 4446ms
+
+Number of threads in the pool: 6
+--------------------------------
+Test 0: 6834ms
+Test 1: 4501ms
+Test 2: 3546ms
+
+Average elapsed time: 4960ms
+
+Number of threads in the pool: 7
+--------------------------------
+Test 0: 2389ms
+Test 1: 2278ms
+Test 2: 2148ms
+
+Average elapsed time: 2271ms
+
+Number of threads in the pool: 8
+--------------------------------
+Test 0: 2572ms
+Test 1: 2790ms
+Test 2: 2439ms
+
+Average elapsed time: 2600ms
+
+Number of threads in the pool: 9
+--------------------------------
+Test 0: 2800ms
+Test 1: 6455ms
+Test 2: 2753ms
+
+Average elapsed time: 4002ms
+
+
+Best performance with 7 threads (2271ms)
